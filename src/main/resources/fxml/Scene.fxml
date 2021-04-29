@@ -21,7 +21,7 @@
    <right>
       <VBox BorderPane.alignment="CENTER">
          <children>
-            <Button mnemonicParsing="false" onAction="#Try" text="Try" />
+            <Button fx:id="TryButton" mnemonicParsing="false" onAction="#Try" text="Try" />
          </children>
       </VBox>
    </right>

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.TreeMap;
 
+import it.polito.tdp.IndovinaNumero.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -14,30 +15,12 @@ import javafx.scene.control.Button;
 
 public class FXMLController {
 	
-	TreeMap<Integer,Integer> MapNumero = new TreeMap<Integer,Integer>();
-	int Attempts;
-    int TotAtt;
-	double Nmax = 100;
-	int SecretNumber = GetSecretNumber();
-	int Intervall;
-	int a;
-	int b;
-	boolean ShowInterval = true;
+	private Model model;
 	
-	
-	private int GetSecretNumber(){
-		
-		double Random = Math.random()*Nmax;
-		int SecretNumber = (int)Random;
-		
-		if(SecretNumber==0) {
-			SecretNumber = GetSecretNumber();
-		}
-		
-		return SecretNumber;
+	public void SetController(Model model) {
+		this.model = model;
 	}
 	
-
     @FXML
     private ResourceBundle resources;
 
@@ -67,69 +50,51 @@ public class FXMLController {
     
     @FXML
     private Label Interval;
+    
+    @FXML
+    private Button TryButton;
 
     @FXML
     void Easy(ActionEvent event) {
 
-    	Nmax = 100;
-    	Attempts = 16;
-    	TotAtt = Attempts;
+    	model.EasyGame();
     	MediumB.setDisable(true);
+    	EasyB.setDisable(true);
     	HardB.setDisable(true);
-    	Attemptsleft.setText("Attempts Left: "+Attempts);
+    	Attemptsleft.setText("Attempts Left: "+model.getAttempts());
     	Interval.setDisable(false);
-    	Intervall = 25;
-        a = SecretNumber-Intervall;
-        b = SecretNumber+Intervall;
-    	
-    	if((SecretNumber-Intervall)<1 ) {
-    		a = 1;
-    	}
-    	if((SecretNumber+Intervall)>100) {
-    		b = 100;
-    	}
-    	
-    	Interval.setText("Interval of secret number: " +a+ "-" +b);
+    	Interval.setText("Interval of secret number: " +model.getA()+ "-" +model.getB());
+    	TryButton.setDisable(false);
+    	TxtNumber.setDisable(false);
     	
     }
 
     @FXML
     void Hard(ActionEvent event) {
     	
-    	Nmax = 100;
-    	Attempts = 2;
-    	TotAtt = Attempts;
+    	model.HardGame();
     	EasyB.setDisable(true);
     	MediumB.setDisable(true);
-    	Attemptsleft.setText("Attempts Left: "+Attempts);
+    	HardB.setDisable(true);
+    	Attemptsleft.setText("Attempts Left: "+model.getAttempts());
     	Interval.setDisable(true);
-    	ShowInterval = false;
+    	TryButton.setDisable(false);
+    	TxtNumber.setDisable(false);
 
     }
 
     @FXML
     void Medium(ActionEvent event) {
   
-    	Nmax = 100;
-    	Attempts = 7;
-    	TotAtt = Attempts;
+    	model.MediumGame();
     	EasyB.setDisable(true);
     	HardB.setDisable(true);
-    	Attemptsleft.setText("Attempts Left: "+Attempts);
-    	Intervall = 15;
+    	MediumB.setDisable(true);
+    	Attemptsleft.setText("Attempts Left: "+model.getAttempts());
     	Interval.setDisable(false);
-    	
-    	a = SecretNumber-Intervall;
-        b = SecretNumber+Intervall;
-    	
-    	if((SecretNumber-Intervall)<1 ) {
-    		a = 1;
-    	}
-    	if((SecretNumber+Intervall)>100) {
-    		b = 100;
-    	}
-    	
-    	Interval.setText("Interval of secret number: " +a+ "-" +b);
+    	Interval.setText("Interval of secret number: " +model.getA()+ "-" +model.getB());
+    	TryButton.setDisable(false);
+    	TxtNumber.setDisable(false);
     	 	
     }
     
@@ -137,123 +102,44 @@ public class FXMLController {
     @FXML
     void New(ActionEvent event) {
 
-    	//Attempts = 7;
-    	SecretNumber = GetSecretNumber();
+    	model.NewGame();
         TxtNumber.setText("");
-        TxtNumber.setDisable(false);
         Result.setText("");
-        Attemptsleft.setText("Attempts Left: "+Attempts);
+        Attemptsleft.setText("Attempts Left: "+model.getAttempts());
         PBar.setProgress(0);
         EasyB.setDisable(false);
         MediumB.setDisable(false);
     	HardB.setDisable(false);
-        MapNumero.clear();
         Interval.setDisable(false);
         Interval.setText("");
         Result.setText("");
-        ShowInterval = true;
+        TryButton.setDisable(true);
+        TxtNumber.setDisable(true);
         
     }
     
     @FXML
     void Try(ActionEvent event) {
 
-    	String u = TxtNumber.getText();
-    	int p = 0;
-    	
-    	if(u.equals("")) {
-    		Result.setText("Enter a whole Number between 1-100 please");
-    		return;
+    	if(model.getAttempts() <= 0) {
+    		Result.setText(model.CheckEnteredNumber("1")+ " and the secret number was: " +model.getSecretNumber());
+    		TryButton.setDisable(true);
+            TxtNumber.setText("");
+            TxtNumber.setDisable(true);
     	}
     	
-    	try{
-    	p = Integer.parseInt(u);
+    	Result.setText(model.CheckEnteredNumber(TxtNumber.getText()));
     	
+    	if(model.isShowInterval() == true) {
+    		Interval.setText("Interval of secret number: " +model.getA()+ "-" +model.getB());
     	}
-    	catch(NumberFormatException e) {
-    		Result.setText("Enter a whole Number please");
-    		return;
-    	}
-    	
-    	if(p <= 0 || p >= 101 ) {
-    		Result.setText("Choose a whole number between 1-100");
-    		return;
-    	}
-    	
-    	if(MapNumero.get(p)!=null) {
-    		Result.setText("Number already entered, enter a different one");
-    		return;
-    	}
-    	
-    	MapNumero.put(p, p);
-    	
-    	if(p == SecretNumber) {
-    		Result.setText("U win!");
-    		TxtNumber.setDisable(true);
-    	}
-    	else if(p < SecretNumber) {
-    		Result.setText("Too Low");
-    		Attempts--;
-    		a = a+3;
+   
+    		Attemptsleft.setText("Attempts Left: "+model.getAttempts());
     		
-    		if(a>b) {
-    			a = SecretNumber-1;
-    		}
+    		PBar.setProgress(model.ProgressPercentage());
     		
-    		b = b-3;
-    		
-    		if(b<a) {
-    			b = a+2;
-    		}
-    		
-    		if(ShowInterval == true) {
-    			
-    			System.out.println("hola1");
-    			Interval.setText("Interval of secret number: " +a+ "-" +b);
-    			
-    		}
-    		
-    		//Interval.setText("Interval of secret number: " +a+ "-" +b);
-    		Attemptsleft.setText("Attempts Left: "+Attempts);
-    		double i = 1 - (double)(Attempts)/TotAtt;
-    		PBar.setProgress(i);
-    		//return;
-    	}
-    	else if(p > SecretNumber ) {
-    		Result.setText("Too High");
-    		Attempts--;
-    		a = a+3;
-    		
-    		if(a>b) {
-    			a = SecretNumber-1;
-    		}
-    		
-    		b = b-3;
-    		
-    		if(b<a) {
-    			b = a+2;
-    		}
-    		
-    		if(ShowInterval == true) {
-    			
-    			System.out.println("hola2");
-    			Interval.setText("Interval of secret number: " +a+ "-" +b);
-    			
-    		}
-    		
-    		//Interval.setText("Interval of secret number: " +a+ "-" +b);
-    		Attemptsleft.setText("Attempts Left: "+Attempts);
-    		double i = 1 - (double)(Attempts)/TotAtt;
-    		PBar.setProgress(i);
-    		//return;
-    	}
-    	
-    	if(Attempts <= 0) {
-    		Result.setText("U Lose! and the secret number was: " +SecretNumber);
-    		return;
-    	}
-	
     }
+    		
 
     @FXML
     void initialize() {
@@ -265,6 +151,11 @@ public class FXMLController {
         assert MediumB != null : "fx:id=\"MediumB\" was not injected: check your FXML file 'Scene.fxml'.";
         assert HardB != null : "fx:id=\"HardB\" was not injected: check your FXML file 'Scene.fxml'.";
         assert Interval != null : "fx:id=\"Interval\" was not injected: check your FXML file 'Scene.fxml'.";
-
+        assert TryButton != null : "fx:id=\"TryButton\" was not injected: check your FXML file 'Scene.fxml'.";
+        EasyB.setDisable(true);
+        MediumB.setDisable(true);
+        HardB.setDisable(true);
+        TryButton.setDisable(true);
+        TxtNumber.setDisable(true);
     }
 }
